@@ -1,0 +1,11 @@
+<a href="#/" class="btn btn-danger btn-large" ng-click="beginRecording()"></a>
+{{ printTime | date:'medium' }}
+<audio id="player" controls></audio>
+<div id="viz">
+  <canvas id="analyser" width="100" height="10"></canvas>
+  <canvas id="wavedisplay" width="100" height="10"></canvas>
+</div>
+
+<div id="controls">
+  <a id="save" href="audio.html">Save</a>
+</div>
