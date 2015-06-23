@@ -26,6 +26,7 @@ recorderApp.controller('RecorderController', ['$scope', '$sce', '$timeout', func
   $scope.test = 0;
   $scope.server = false;
   $scope.time = 0;
+  $scope.startRecordingTime = 0;
   $scope.printTime = '';
   var buffer = new Uint8Array();
 
@@ -40,6 +41,7 @@ recorderApp.controller('RecorderController', ['$scope', '$sce', '$timeout', func
     if ($scope.recording)
       return;
     console.log('start recording');
+    $scope.startRecordingTime = (new Date()).getTime();
     $scope.encoder = new Worker('scripts/worker/encoder.js');
     console.log('initializing encoder with samplerate = ' + $scope.samplerate + ' and bitrate = ' + $scope.bitrate);
     $scope.encoder.postMessage({cmd: 'init', config: {samplerate: $scope.samplerate, bitrate: $scope.bitrate}});
@@ -63,14 +65,14 @@ recorderApp.controller('RecorderController', ['$scope', '$sce', '$timeout', func
 
         $scope.$apply();
       } else {
-        $timeout(updateTime, 100);
+        $timeout(updateTime, 10);
       }
     };
 
     //This can be used with a WebSocket
     //$scope.ws = new WebSocket("ws://" + window.location.host + "/ws/audio");
     //$scope.ws.onopen = function() {
-    $scope.initializeMedia();
+      $scope.initializeMedia();
     //};
 
     function encode64(buffer) {
@@ -99,7 +101,7 @@ recorderApp.controller('RecorderController', ['$scope', '$sce', '$timeout', func
     }
 
     function updateTime() {
-        $scope.time += 100;
+        $scope.time = (new Date()).getTime() - $scope.startRecordingTime;
         $scope.printTime = convertTime($scope.time);
     }
 
