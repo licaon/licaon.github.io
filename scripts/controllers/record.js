@@ -12,13 +12,20 @@ recorderApp.controller('RecorderController', ['$scope', '$sce', '$timeout', func
   $scope.trustSrc = function (src) {
     return $sce.trustAsResourceUrl(src);
   };
+
+  if (typeof AudioContext !== 'undefined') {
+    var audioCtx = new AudioContext();
+  } else {
+    var audioCtx = {sampleRate: 44100};
+  }
+
   $scope.stream = null;
   $scope.recording = false;
   $scope.encoder = null;
   $scope.ws = null;
   $scope.input = null;
   $scope.node = null;
-  $scope.samplerate = 22050;
+  $scope.samplerate = audioCtx.sampleRate;
   $scope.samplerates = [8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000];
   $scope.bitrate = 64;
   $scope.bitrates = [8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 192, 224, 256, 320];
@@ -28,6 +35,8 @@ recorderApp.controller('RecorderController', ['$scope', '$sce', '$timeout', func
   $scope.time = 0;
   $scope.startRecordingTime = 0;
   $scope.printTime = '';
+  $scope.limit = 600000; //limit recording to 10 min
+
   var buffer = new Uint8Array();
 
   var _appendBuffer = function (buffer1, buffer2) {
@@ -72,7 +81,7 @@ recorderApp.controller('RecorderController', ['$scope', '$sce', '$timeout', func
     //This can be used with a WebSocket
     //$scope.ws = new WebSocket("ws://" + window.location.host + "/ws/audio");
     //$scope.ws.onopen = function() {
-      $scope.initializeMedia();
+    $scope.initializeMedia();
     //};
 
     function encode64(buffer) {
@@ -101,8 +110,10 @@ recorderApp.controller('RecorderController', ['$scope', '$sce', '$timeout', func
     }
 
     function updateTime() {
-        $scope.time = (new Date()).getTime() - $scope.startRecordingTime;
-        $scope.printTime = convertTime($scope.time);
+      $scope.time = (new Date()).getTime() - $scope.startRecordingTime;
+      $scope.printTime = convertTime($scope.time);
+
+      $scope.time >= $scope.limit && $scope.stopRecording();
     }
 
   };
